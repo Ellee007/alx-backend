@@ -1,44 +1,45 @@
 #!/usr/bin/env python3
 """
-This is our python module
+LRU -Least recently used cache class module
 """
-BaseCaching = __import__("base_caching").BaseCaching
-"""
-BaseCaching class
-"""
+from base_caching import BaseCaching
+from datetime import datetime
 
 
 class LRUCache(BaseCaching):
     """
-    This is our LRUCache class
+    LRU cache class
     """
+    key_use_frequency = {}
+
     def __init__(self):
-        """
-        This is the constructor
-        """
+        """ Class constructor """
         super().__init__()
-        self.lru_list = []
 
     def put(self, key, item):
-        """
-        This is our put method
-        """
-        if key is not None and item is not None:
-            self.cache_data[key] = item
-        else:
-            return
-        if key in self.lru_list:
-            self.lru_list.remove(key)
-        elif len(self.cache_data) > super().MAX_ITEMS:
-            print("DISCARD:", self.lru_list[0])
-            self.cache_data.pop(self.lru_list[0])
-            self.lru_list.pop(0)
-        self.lru_list.append(key)
+        """ Add an item to cache """
+        if key and item:
+            if len(self.cache_data) < BaseCaching.MAX_ITEMS:
+                self.cache_data[key] = item
+                LRUCache.key_use_frequency[key] = datetime.now()
+            else:
+                if key in self.cache_data.keys():
+                    self.cache_data[key] = item
+                    LRUCache.key_use_frequency[key] = datetime.now()
+                else:
+                    sort_key = LRUCache.key_use_frequency.get
+                    my_dict = LRUCache.key_use_frequency
+                    key_least_used = min(my_dict, key=sort_key)
+                    del self.cache_data[key_least_used]
+                    del LRUCache.key_use_frequency[key_least_used]
+                    print(f"DISCARD: {key_least_used}")
+
+                    self.cache_data[key] = item
+                    LRUCache.key_use_frequency[key] = datetime.now()
 
     def get(self, key):
-        """
-        This is our get method
-        """
-        if key is None:
+        """ Retrieves an item from cache"""
+        if key is None or key not in self.cache_data.keys():
             return None
-        return self.cache_data.get(key)
+        LRUCache.key_use_frequency[key] = datetime.now()
+        return self.cache_data[key]
